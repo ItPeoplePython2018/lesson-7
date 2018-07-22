@@ -1,0 +1,790 @@
+Type 'django-admin help <subcommand>' for help on a specific subcommand.
+
+Available subcommands:
+
+[django]
+    check
+    compilemessages
+    createcachetable
+    dbshell
+    diffsettings
+    dumpdata
+    flush
+    inspectdb
+    loaddata
+    makemessages
+    makemigrations
+    migrate
+    runserver
+    sendtestemail
+    shell
+    showmigrations
+    sqlflush
+    sqlmigrate
+    sqlsequencereset
+    squashmigrations
+    startapp
+    startproject
+    test
+    testserver
+Note that only Django core commands are listed as settings are not properly configured (error: Requested setting INSTALLED_APPS, but settings are not configured. You must either define the environment variable DJANGO_SETTINGS_MODULE or call settings.configure() before accessing settings.).
+╭─alurin@alurin-smart ~/projects
+╰─$ django-admin startproject amazon
+╭─alurin@alurin-smart ~/projects
+╰─$ cd amazon
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ ls -l
+total 8
+drwxrwxr-x 2 alurin alurin 4096 июл 18 19:09 amazon
+-rwxrwxr-x 1 alurin alurin  538 июл 18 19:09 manage.py
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ mkdir amazon/books
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ django-admin startapp books amazon/books
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python manage.py makemigrations books
+  File "manage.py", line 14
+    ) from exc
+         ^
+SyntaxError: invalid syntax
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py makemigrations books              1 ↵
+Migrations for 'books':
+  amazon/books/migrations/0001_initial.py
+    - Create model Author
+    - Create model Book
+    - Create model Genre
+    - Add field genres to book
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, books, contenttypes, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying books.0001_initial... OK
+  Applying sessions.0001_initial... OK
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py shell
+Python 3.6.5 (default, Apr  1 2018, 05:46:30)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 6.3.1 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: from amazon.books.models import Author, Genre, Book
+
+In [2]: Genre.objects
+Out[2]: <django.db.models.manager.Manager at 0x7fa1544a43c8>
+
+In [3]: Genre.objects.all()
+Out[3]: <QuerySet []>
+
+In [4]: q = Genre.objects.all()
+
+In [5]: q.all()
+Out[5]: <QuerySet []>
+
+In [6]: Genre.objects.create(name='Фантастика')
+Out[6]: <Genre: Genre object (1)>
+
+In [7]: Genre.objects.get_or_create(name='Фантастика')
+Out[7]: (<Genre: Genre object (1)>, False)
+
+In [8]: Genre.objects.get_or_create(name='Детектив')
+Out[8]: (<Genre: Genre object (2)>, True)
+
+In [9]: Genre.objects.get(id=2)
+Out[9]: <Genre: Genre object (2)>
+
+In [10]:
+
+In [10]: inst = Genre.objects.get(id=2)
+
+In [11]: inst
+Out[11]: <Genre: Genre object (2)>
+
+In [12]: inst.name
+Out[12]: 'Детектив'
+
+In [13]: inst.name = 'Биография'
+
+In [14]: inst.name
+Out[14]: 'Биография'
+
+In [15]: inst.save(update_fields=['name'])
+
+In [16]: Genre.objects.get(id=2).name
+Out[16]: 'Биография'
+
+In [17]: inst = Genre.objects.create(name='Abrakadabra')
+
+In [18]: inst.name
+Out[18]: 'Abrakadabra'
+
+In [19]: #inst.delete()
+
+In [20]: Genre.objects.get(id=3).name
+Out[20]: 'Abrakadabra'
+
+In [21]: inst.delete()
+Out[21]: (1, {'books.Book_genres': 0, 'books.Genre': 1})
+
+In [22]: Author
+Out[22]: amazon.books.models.Author
+
+In [23]: Author.objects.create(name='Пушкин')
+Out[23]: <Author: Author object (1)>
+
+In [24]: author = Author.objects.get(id=1)
+
+In [25]: book1 = Book.objects.create(author=author, name='Ду
+    ...: бровский')
+------------------------------------------------------------
+TypeError                  Traceback (most recent call last)
+<ipython-input-25-75ca5ccc2f5a> in <module>()
+----> 1 book1 = Book.objects.create(author=author, name='Дубровский')
+
+~/.local/lib/python3.6/site-packages/django/db/models/manager.py in manager_method(self, *args, **kwargs)
+     80         def create_method(name, method):
+     81             def manager_method(self, *args, **kwargs):
+---> 82                 return getattr(self.get_queryset(), name)(*args, **kwargs)
+     83             manager_method.__name__ = method.__name__
+     84             manager_method.__doc__ = method.__doc__
+
+~/.local/lib/python3.6/site-packages/django/db/models/query.py in create(self, **kwargs)
+    413         and returning the created object.
+    414         """
+--> 415         obj = self.model(**kwargs)
+    416         self._for_write = True
+    417         obj.save(force_insert=True, using=self.db)
+
+~/.local/lib/python3.6/site-packages/django/db/models/base.py in __init__(self, *args, **kwargs)
+    493                     pass
+    494             for kwarg in kwargs:
+--> 495                 raise TypeError("'%s' is an invalid keyword argument for this function" % kwarg)
+    496         super().__init__()
+    497         post_init.send(sender=cls, instance=self)
+
+TypeError: 'name' is an invalid keyword argument for this function
+
+In [26]: book1 = Book.objects.create(author=author, title='Д
+    ...: убровский')
+
+In [27]: book2 = Book.objects.create(author=author, title='М
+    ...: етель')
+
+In [28]: inst
+Out[28]: <Genre: Genre object (None)>
+
+In [29]: Genre.objects.filter(name__icontains='дет')
+Out[29]: <QuerySet []>
+
+In [30]: Genre.objects.filter(name__icontains='Дет')
+Out[30]: <QuerySet []>
+
+In [31]: Genre.objects.filter(name__icontains='био')
+Out[31]: <QuerySet []>
+
+In [32]: Genre.objects.filter(name__contains='био')
+Out[32]: <QuerySet []>
+
+In [33]: Genre.objects.filter(name__icontains='био')
+Out[33]: <QuerySet []>
+
+In [34]: for k in Genre.objects.all(): print(k.name)
+Фантастика
+Биография
+
+In [35]: Genre.objects.filter(name__icontains='Био')
+Out[35]: <QuerySet [<Genre: Genre object (2)>]>
+
+In [36]: Genre.objects.filter(name__icontains='био')
+Out[36]: <QuerySet []>
+
+In [37]: Genre.objects.filter(name__icontains='Био')
+Out[37]: <QuerySet [<Genre: Genre object (2)>]>
+
+In [38]: Genre.objects.filter(name__icontains='Био').get()
+Out[38]: <Genre: Genre object (2)>
+
+In [39]: genre = Genre.objects.all()[0]
+
+In [40]: genre.name
+Out[40]: 'Фантастика'
+
+In [41]: book.title
+------------------------------------------------------------
+NameError                  Traceback (most recent call last)
+<ipython-input-41-98ed2cef7f67> in <module>()
+----> 1 book.title
+
+NameError: name 'book' is not defined
+
+In [42]: book2.title
+Out[42]: 'Метель'
+
+In [43]: book2.genres
+Out[43]: <django.db.models.fields.related_descriptors.create_forward_many_to_many_manager.<locals>.ManyRelatedManager at 0x7fa154346a20>
+
+In [44]: book2.genres.add(genre)
+
+In [45]:
+
+In [45]: genre.books.add
+Out[45]: <bound method create_forward_many_to_many_manager.<locals>.ManyRelatedManager.add of <django.db.models.fields.related_descriptors.create_forward_many_to_many_manager.<locals>.ManyRelatedManager object at 0x7fa154346d68>>
+
+In [46]: Book.objects.all()
+Out[46]: <QuerySet [<Book: Book object (1)>, <Book: Book object (2)>]>
+
+In [47]: genre.books.all()
+Out[47]: <QuerySet [<Book: Book object (2)>]>
+
+In [48]: Book.objects.filter(genres__in=Genre.objects.all())
+    ...:
+Out[48]: <QuerySet [<Book: Book object (2)>]>
+
+In [49]: Book.objects.filter(genres=genre)
+Out[49]: <QuerySet [<Book: Book object (2)>]>
+
+In [50]: Book.objects.filter(genres=genre)[0]
+Out[50]: <Book: Book object (2)>
+
+In [51]: for b in Book.objects.filter(genres=genre): print(b
+    ...: .title)
+Метель
+
+In [52]:
+
+
+
+╭─alurin@alurin-smart ~
+╰─$ cd projects/amazon
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py shell
+Python 3.6.5 (default, Apr  1 2018, 05:46:30)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 6.3.1 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: from amazon.books.models import *
+
+In [2]: Book
+Out[2]: amazon.books.models.Book
+
+In [3]: Genre
+Out[3]: amazon.books.models.Genre
+
+In [4]: Author
+Out[4]: amazon.books.models.Author
+
+In [5]:
+Do you really want to exit ([y]/n)? y
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py makemigrations books
+You are trying to add a non-nullable field 'rate' to book without a default; we can't do that (the database needs something to populate existing rows).
+Please select a fix:
+ 1) Provide a one-off default now (will be set on all existing rows with a null value for this column)
+ 2) Quit, and let me add a default in models.py
+Select an option: 1
+Please enter the default value now, as valid Python
+The datetime and django.utils.timezone modules are available, so you can do e.g. timezone.now
+Type 'exit' to exit this prompt
+>>> 0
+Migrations for 'books':
+  amazon/books/migrations/0002_book_rate.py
+    - Add field rate to book
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, books, contenttypes, sessions
+Running migrations:
+  Applying books.0002_book_rate... OK
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py shell
+Python 3.6.5 (default, Apr  1 2018, 05:46:30)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 6.3.1 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: from amazon.books.models import *
+
+In [2]: Book.objects.count()
+Out[2]: 2
+
+In [3]: Author.objects.count()
+Out[3]: 1
+
+In [4]: author = Author.objects.create(name='Фед')
+
+In [5]: author.name = 'Фет'
+
+In [6]: author.save()
+
+In [7]: Book.objects.create(title='Стихи', author=author, ra
+   ...: te=4.9)
+Out[7]: <Book: Book object (3)>
+
+In [8]: author2 = Author.objects.get(name='Пушкин')
+
+In [9]: Book.objects.create(title='Выстрел', author=author2,
+   ...:  rate=4.3)
+Out[9]: <Book: Book object (4)>
+
+In [10]:
+Do you really want to exit ([y]/n)? y
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py shell
+Python 3.6.5 (default, Apr  1 2018, 05:46:30)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 6.3.1 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: from amazon.books.models import *
+
+In [2]: Book.objects.filter(rate__gte=4.5)
+Out[2]: <QuerySet [<Book: Стихи :: Фет [4.9]>]>
+
+In [3]: Book.objects.filter(rate__gte=4.5, rate__lt=4)
+Out[3]: <QuerySet []>
+
+In [4]: Book.objects.filter(rate__gte=4.5, rate__lt=4)
+Out[4]: <QuerySet []>
+
+In [5]: from django.db.models import Q, F
+
+In [6]: Book.objects.filter(Q(rate__gte=4.5), Q(rate__lt=4))
+   ...:
+Out[6]: <QuerySet []>
+
+In [7]: Book.objects.filter(Q(rate__gte=4.5) | Q(rate__lt=4)
+   ...: )
+Out[7]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>]>
+
+In [8]: Book.objects.filter(Q(rate__gte=4.5) or Q(rate__lt=4
+   ...: ))
+Out[8]: <QuerySet [<Book: Стихи :: Фет [4.9]>]>
+
+In [9]: None or 1
+Out[9]: 1
+
+In [10]: 1 or 2
+Out[10]: 1
+
+In [11]: None and 1
+
+In [12]: None and 2
+
+In [13]: True and 2
+Out[13]: 2
+
+In [14]: None + 1
+------------------------------------------------------------
+TypeError                  Traceback (most recent call last)
+<ipython-input-14-3fd8740bf8ab> in <module>()
+----> 1 None + 1
+
+TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
+
+In [15]: 1 | "2"
+------------------------------------------------------------
+TypeError                  Traceback (most recent call last)
+<ipython-input-15-192e9129453c> in <module>()
+----> 1 1 | "2"
+
+TypeError: unsupported operand type(s) for |: 'int' and 'str'
+
+In [16]: Book.objects.filter(Q(rate__gte=4.5) | Q(rate__lt=4
+    ...: ))
+Out[16]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>]>
+
+In [17]:
+
+In [17]:
+
+In [17]: Book.objects.get(Q(rate=4.9))
+Out[17]: <Book: Стихи :: Фет [4.9]>
+
+In [18]: Book.objects.filter(~Q(rate=4.9))
+Out[18]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Выстрел :: Пушкин [4.3]>]>
+
+In [19]: ~2
+Out[19]: -3
+
+In [20]: Book.objects.exclude(rate=4.9)
+Out[20]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Выстрел :: Пушкин [4.3]>]>
+
+In [21]: Book.objects.exclude(rate=4.9, rate=0.0)
+  File "<ipython-input-21-8016eebbdb62>", line 1
+    Book.objects.exclude(rate=4.9, rate=0.0)
+                                  ^
+SyntaxError: keyword argument repeated
+
+
+In [22]: Book.objects.exclude(Q(rate=4.9), Q(rate=0.0))
+Out[22]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>]>
+
+In [23]: Book.objects.exclude(Q(rate=4.9) | Q(rate=0.0))
+Out[23]: <QuerySet [<Book: Выстрел :: Пушкин [4.3]>]>
+
+In [24]: Book.objects.exclude(Q(rate=4.9) | Q(rate=0))
+Out[24]: <QuerySet [<Book: Выстрел :: Пушкин [4.3]>]>
+
+In [25]: Book.objects.all()
+Out[25]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>]>
+
+In [26]: Book.objects.all().query
+Out[26]: <django.db.models.sql.query.Query at 0x7f760ea44da0>
+
+In [27]: Book.objects.all().query.query
+------------------------------------------------------------
+AttributeError             Traceback (most recent call last)
+<ipython-input-27-3c31652cafc9> in <module>()
+----> 1 Book.objects.all().query.query
+
+AttributeError: 'Query' object has no attribute 'query'
+
+In [28]: print(Book.objects.all().query)
+SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book"
+
+In [29]: Book.objects.all().order_by('title')
+Out[29]: <QuerySet [<Book: Выстрел :: Пушкин [4.3]>, <Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>]>
+
+In [30]: Book.objects.all().order_by('-title')
+Out[30]: <QuerySet [<Book: Стихи :: Фет [4.9]>, <Book: Метель :: Пушкин [0.0]>, <Book: Дубровский :: Пушкин [0.0]>, <Book: Выстрел :: Пушкин [4.3]>]>
+
+In [31]: Book.objects.all().order_by('author__name', 'title'
+    ...: )
+Out[31]: <QuerySet [<Book: Выстрел :: Пушкин [4.3]>, <Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>]>
+
+In [32]: Book.objects.all().order_by('title')
+Out[32]: <QuerySet [<Book: Выстрел :: Пушкин [4.3]>, <Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>]>
+
+In [33]: Book.objects.all().order_by('-author__name', 'title
+    ...: ')
+Out[33]: <QuerySet [<Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>, <Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>]>
+
+In [34]: print Book.objects.all().order_by('-author__name',
+    ...: 'title').query
+  File "<ipython-input-34-a4974b187bd9>", line 1
+    print Book.objects.all().order_by('-author__name', 'title').query
+             ^
+SyntaxError: invalid syntax
+
+
+In [35]: print(Book.objects.all().order_by('-author__name',
+    ...: 'title').query)
+SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" INNER JOIN "books_author" ON ("books_book"."author_id" = "books_author"."id") ORDER BY "books_author"."name" DESC, "books_book"."title" ASC
+
+In [36]: Book.objects.values('id', 'title')
+Out[36]: <QuerySet [{'id': 1, 'title': 'Дубровский'}, {'id': 2, 'title': 'Метель'}, {'id': 3, 'title': 'Стихи'}, {'id': 4, 'title': 'Выстрел'}]>
+
+In [37]: Book.objects.values('id', 'title')[0]
+Out[37]: {'id': 1, 'title': 'Дубровский'}
+
+In [38]: print(Book.objects.values('id', 'title').query)
+SELECT "books_book"."id", "books_book"."title" FROM "books_book"
+
+In [39]: Book.objects.values('id', 'title')
+Out[39]: <QuerySet [{'id': 1, 'title': 'Дубровский'}, {'id': 2, 'title': 'Метель'}, {'id': 3, 'title': 'Стихи'}, {'id': 4, 'title': 'Выстрел'}]>
+
+In [40]: Book.objects.values_list('id', 'title')
+Out[40]: <QuerySet [(1, 'Дубровский'), (2, 'Метель'), (3, 'Стихи'), (4, 'Выстрел')]>
+
+In [41]: Book.objects.values_list('title', flat=True)
+Out[41]: <QuerySet ['Дубровский', 'Метель', 'Стихи', 'Выстрел']>
+
+In [42]: Book.objects.values_list('author_id', flat=True)
+Out[42]: <QuerySet [1, 1, 1, 2]>
+
+In [43]: Book.objects.values_list('author_id', flat=True).di
+    ...: stinct()
+Out[43]: <QuerySet [1, 2]>
+
+In [44]: Book.objects.values_list('author_id').distinct()
+Out[44]: <QuerySet [(1,), (2,)]>
+
+In [45]: Book.objects.values_list('author_id', 'title').dist
+    ...: inct()
+Out[45]: <QuerySet [(1, 'Дубровский'), (1, 'Метель'), (1, 'Выстрел'), (2, 'Стихи')]>
+
+In [46]: Book.objects.values_list('author_id', 'title').dist
+    ...: inct().count()
+Out[46]: 4
+
+In [47]: Book.objects.all().count()
+Out[47]: 4
+
+In [48]: Book.objects.all().exists()
+Out[48]: True
+
+In [49]: Book.objects.values_list('author_id').distinct()
+Out[49]: <QuerySet [(1,), (2,)]>
+
+In [50]: for book in Book.objects.all():
+    ...:     print(book.author)
+    ...:
+Пушкин
+Пушкин
+Фет
+Пушкин
+
+In [51]: from django.db import connection
+
+In [52]: len(connection.queries)
+Out[52]: 82
+
+In [53]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book"', 'time': '0.001'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+
+In [54]: for book in Book.objects.all().select_related('auth
+    ...: or'):
+    ...:     print(book.author)
+    ...:
+Пушкин
+Пушкин
+Фет
+Пушкин
+
+In [55]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate", "books_author"."id", "books_author"."name" FROM "books_book" INNER JOIN "books_author" ON ("books_book"."author_id" = "books_author"."id")', 'time': '0.001'}
+
+In [56]: for book in Book.objects.all().prefetch_releated('a
+    ...: uthor'):
+    ...:     print(book.author)
+    ...:
+------------------------------------------------------------
+AttributeError             Traceback (most recent call last)
+<ipython-input-56-824662513585> in <module>()
+----> 1 for book in Book.objects.all().prefetch_releated('author'):
+      2     print(book.author)
+      3
+
+AttributeError: 'QuerySet' object has no attribute 'prefetch_releated'
+
+In [57]: for book in Book.objects.all().prefetch_related('au
+    ...: thor'):
+    ...:     print(book.author)
+    ...:
+Пушкин
+Пушкин
+Фет
+Пушкин
+
+In [58]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate", "books_author"."id", "books_author"."name" FROM "books_book" INNER JOIN "books_author" ON ("books_book"."author_id" = "books_author"."id")', 'time': '0.001'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book"', 'time': '0.001'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" IN (1, 2)', 'time': '0.000'}
+
+In [59]: exit()
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py makemigrations books
+Migrations for 'books':
+  amazon/books/migrations/0003_auto_20180721_0751.py
+    - Alter field author on book
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, books, contenttypes, sessions
+Running migrations:
+  Applying books.0003_auto_20180721_0751... OK
+╭─alurin@alurin-smart ~/projects/amazon
+╰─$ python3 manage.py shell
+Python 3.6.5 (default, Apr  1 2018, 05:46:30)
+Type 'copyright', 'credits' or 'license' for more information
+IPython 6.3.1 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: from amazon.books.models import *
+
+In [2]: Book.objects.create(title='Алгебра', rate=5)
+Out[2]: <Book: Алгебра :: None [5]>
+
+In [3]: Book.objects.filter(author__isnull=True)
+Out[3]: <QuerySet [<Book: Алгебра :: None [5.0]>]>
+
+In [4]: Book.objects.filter(author__isnull=False)
+Out[4]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>]>
+
+In [5]: Book.objects.filter(None)
+\------------------------------------------------------------
+TypeError                  Traceback (most recent call last)
+<ipython-input-5-c070db0bcf93> in <module>()
+----> 1 Book.objects.filter(None)
+
+~/.local/lib/python3.6/site-packages/django/db/models/manager.py in manager_method(self, *args, **kwargs)
+     80         def create_method(name, method):
+     81             def manager_method(self, *args, **kwargs):
+---> 82                 return getattr(self.get_queryset(), name)(*args, **kwargs)
+     83             manager_method.__name__ = method.__name__
+     84             manager_method.__doc__ = method.__doc__
+
+~/.local/lib/python3.6/site-packages/django/db/models/query.py in filter(self, *args, **kwargs)
+    834         set.
+    835         """
+--> 836         return self._filter_or_exclude(False, *args, **kwargs)
+    837
+    838     def exclude(self, *args, **kwargs):
+
+~/.local/lib/python3.6/site-packages/django/db/models/query.py in _filter_or_exclude(self, negate, *args, **kwargs)
+    852             clone.query.add_q(~Q(*args, **kwargs))
+    853         else:
+--> 854             clone.query.add_q(Q(*args, **kwargs))
+    855         return clone
+    856
+
+~/.local/lib/python3.6/site-packages/django/db/models/sql/query.py in add_q(self, q_object)
+   1251         # So, demotion is OK.
+   1252         existing_inner = {a for a in self.alias_map if self.alias_map[a].join_type == INNER}
+-> 1253         clause, _ = self._add_q(q_object, self.used_aliases)
+   1254         if clause:
+   1255             self.where.add(clause, AND)
+
+~/.local/lib/python3.6/site-packages/django/db/models/sql/query.py in _add_q(self, q_object, used_aliases, branch_negated, current_negated, allow_joins, split_subq)
+   1275                     child, can_reuse=used_aliases, branch_negated=branch_negated,
+   1276                     current_negated=current_negated, allow_joins=allow_joins,
+-> 1277                     split_subq=split_subq,
+   1278                 )
+   1279                 joinpromoter.add_votes(needed_inner)
+
+~/.local/lib/python3.6/site-packages/django/db/models/sql/query.py in build_filter(self, filter_expr, branch_negated, current_negated, can_reuse, allow_joins, split_subq, reuse_with_filtered_relation)
+   1148         if isinstance(filter_expr, dict):
+   1149             raise FieldError("Cannot parse keyword query as dict")
+-> 1150         arg, value = filter_expr
+   1151         if not arg:
+   1152             raise FieldError("Cannot parse keyword query %r" % arg)
+
+TypeError: 'NoneType' object is not iterable
+
+In [6]: Book.objects.filter(author=None)
+Out[6]: <QuerySet [<Book: Алгебра :: None [5.0]>]>
+
+In [7]: q1 = Book.objects.all()
+
+In [8]: q2 = q1.filter(rate=5)
+
+In [9]: q3 = q1.exclude(rate=0)
+
+In [10]: q1
+Out[10]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>, <Book: Алгебра :: None [5.0]>]>
+
+In [11]: q2
+Out[11]: <QuerySet [<Book: Алгебра :: None [5.0]>]>
+
+In [12]: q3
+Out[12]: <QuerySet [<Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>, <Book: Алгебра :: None [5.0]>]>
+
+In [13]: q1.count()
+Out[13]: 5
+
+In [14]: q1
+Out[14]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>, <Book: Алгебра :: None [5.0]>]>
+
+In [15]: q1
+Out[15]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>, <Book: Алгебра :: None [5.0]>]>
+
+In [16]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+------------------------------------------------------------
+NameError                  Traceback (most recent call last)
+<ipython-input-16-484f181f1851> in <module>()
+----> 1 for q in connection.queries[-5:]:
+      2     print(q)
+      3
+
+NameError: name 'connection' is not defined
+
+In [17]: from django.db import connection
+
+In [18]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" LIMIT 21', 'time': '0.001'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+
+In [19]: q1
+Out[19]: <QuerySet [<Book: Дубровский :: Пушкин [0.0]>, <Book: Метель :: Пушкин [0.0]>, <Book: Стихи :: Фет [4.9]>, <Book: Выстрел :: Пушкин [4.3]>, <Book: Алгебра :: None [5.0]>]>
+
+In [20]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" LIMIT 21', 'time': '0.001'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+
+In [21]: q2
+Out[21]: <QuerySet [<Book: Алгебра :: None [5.0]>]>
+
+In [22]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" WHERE "books_book"."rate" = 5.0 LIMIT 21', 'time': '0.000'}
+
+In [23]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" WHERE "books_book"."rate" = 5.0 LIMIT 21', 'time': '0.000'}
+
+In [24]: q2
+Out[24]: <QuerySet [<Book: Алгебра :: None [5.0]>]>
+
+In [25]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" WHERE "books_book"."rate" = 5.0 LIMIT 21', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" WHERE "books_book"."rate" = 5.0 LIMIT 21', 'time': '0.000'}
+
+In [26]: q2
+Out[26]: <QuerySet [<Book: Алгебра :: None [5.0]>]>
+
+In [27]: for q in connection.queries[-5:]:
+    ...:     print(q)
+    ...:
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 2', 'time': '0.000'}
+{'sql': 'SELECT "books_author"."id", "books_author"."name" FROM "books_author" WHERE "books_author"."id" = 1', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" WHERE "books_book"."rate" = 5.0 LIMIT 21', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" WHERE "books_book"."rate" = 5.0 LIMIT 21', 'time': '0.000'}
+{'sql': 'SELECT "books_book"."id", "books_book"."title", "books_book"."author_id", "books_book"."rate" FROM "books_book" WHERE "books_book"."rate" = 5.0 LIMIT 21', 'time': '0.000'}
+
+In [28]:
+Do you really want to exit ([y]/n)? y
